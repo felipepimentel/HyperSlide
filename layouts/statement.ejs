@@ -1,8 +1,30 @@
-<div class="flex flex-col items-center justify-center h-full text-center p-12 relative z-10">
+<div class="flex flex-col items-center justify-center h-full text-center p-12 relative z-10 overflow-hidden">
+    <!-- Animated Gradient Background -->
+    <div class="absolute inset-0 -z-10">
+        <div
+            class="absolute inset-0 bg-gradient-to-tr from-[var(--hs-accent)]/10 via-transparent to-[var(--hs-secondary)]/10">
+        </div>
+        <div
+            class="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,transparent_0%,var(--hs-bg)_70%)]">
+        </div>
+    </div>
+
+    <!-- Floating Particles (decorative) -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div class="absolute top-1/4 left-1/4 w-2 h-2 rounded-full bg-[var(--hs-accent)]/40 animate-ping"
+            style="animation-duration: 3s"></div>
+        <div class="absolute bottom-1/3 right-1/4 w-1.5 h-1.5 rounded-full bg-[var(--hs-secondary)]/40 animate-ping"
+            style="animation-duration: 4s; animation-delay: 1s"></div>
+        <div class="absolute top-1/2 right-1/3 w-1 h-1 rounded-full bg-white/30 animate-ping"
+            style="animation-duration: 5s; animation-delay: 2s"></div>
+    </div>
+
     <div class="prose prose-2xl prose-invert max-w-4xl w-full">
         <%- content %>
     </div>
+
+    <!-- Accent Line -->
     <div
-        class="absolute inset-0 bg-gradient-to-tr from-blue-500/10 via-purple-500/10 to-transparent pointer-events-none -z-10">
+        class="absolute bottom-16 w-32 h-0.5 bg-gradient-to-r from-transparent via-[var(--hs-accent)] to-transparent opacity-50">
     </div>
 </div>

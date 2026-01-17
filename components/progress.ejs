@@ -1,0 +1,22 @@
+<div class="w-full max-w-xl">
+    <% if (locals.label) { %>
+        <div class="flex justify-between items-center mb-2">
+            <span class="text-sm font-medium text-[var(--hs-text)]/80">
+                <%= label %>
+            </span>
+            <span class="text-sm font-mono text-[var(--hs-accent)]">
+                <%= value || 0 %>%
+            </span>
+        </div>
+        <% } %>
+            <div class="h-3 bg-white/5 rounded-full overflow-hidden backdrop-blur-sm border border-white/10">
+                <div class="h-full rounded-full transition-all duration-1000 ease-out
+            <%= locals.variant === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-400' :
+                locals.variant === 'warning' ? 'bg-gradient-to-r from-amber-500 to-yellow-400' :
+                locals.variant === 'error' ? 'bg-gradient-to-r from-red-500 to-rose-400' :
+                'bg-gradient-to-r from-[var(--hs-accent)] to-[var(--hs-secondary)]' %>"
+                    style="width: <%= value || 0 %>%;">
+                    <div class="w-full h-full bg-white/20 animate-pulse"></div>
+                </div>
+            </div>
+</div>

@@ -1,0 +1,68 @@
+<div class="h-full w-full flex flex-col p-12" style="<%= bgStyle %>">
+    <!-- Title from content is rendered inside -->
+
+    <!-- Comparison Container -->
+    <div class="flex-1 flex items-stretch gap-6 relative mt-8">
+        <!-- Left Side -->
+        <div class="flex-1 glass rounded-2xl p-8 flex flex-col border-l-4 border-[var(--hs-accent)]">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-3 h-3 rounded-full bg-[var(--hs-accent)] animate-pulse"></div>
+                <span class="text-sm font-bold uppercase tracking-wider text-[var(--hs-accent)]">
+                    <%= locals.left_label || 'Option A' %>
+                </span>
+            </div>
+            <div class="prose prose-invert flex-1 comparison-left">
+                <%- content %>
+            </div>
+        </div>
+
+        <!-- VS Divider -->
+        <div class="flex flex-col items-center justify-center">
+            <div class="w-px flex-1 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+            <div
+                class="my-4 w-14 h-14 rounded-full bg-[var(--hs-glass-bg)] backdrop-blur-xl border border-white/10 flex items-center justify-center">
+                <span class="text-sm font-black text-white/80">VS</span>
+            </div>
+            <div class="w-px flex-1 bg-gradient-to-b from-transparent via-white/20 to-transparent"></div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="flex-1 glass rounded-2xl p-8 flex flex-col border-l-4 border-[var(--hs-secondary)]">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-3 h-3 rounded-full bg-[var(--hs-secondary)] animate-pulse"></div>
+                <span class="text-sm font-bold uppercase tracking-wider text-[var(--hs-secondary)]">
+                    <%= locals.right_label || 'Option B' %>
+                </span>
+            </div>
+            <div class="prose prose-invert flex-1 comparison-right">
+                <!-- Content will be same, but CSS hides first half -->
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Split content display - first ul goes left, second goes right */
+        .comparison-left hr,
+        .comparison-left hr~* {
+            display: none;
+        }
+
+        .comparison-right h1,
+        .comparison-right h2,
+        .comparison-right h3 {
+            display: none;
+        }
+
+        .comparison-right>*:not(hr) {
+            display: none;
+        }
+
+        .comparison-right hr {
+            display: none;
+        }
+
+        .comparison-right hr~* {
+            display: block;
+        }
+    </style>
+</div>

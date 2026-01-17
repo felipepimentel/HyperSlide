@@ -1,0 +1,215 @@
+/*
+ * Glassmorphism Theme - Premium Modern UI
+ * A sophisticated theme with frosted glass effects, smooth gradients, and ambient lighting
+ */
+
+:root {
+    /* Core Colors */
+    --hs-bg: #0a0a1a;
+    --hs-text: #f0f0ff;
+    --hs-accent: #8b5cf6;
+    /* Violet-500 */
+    --hs-accent-glow: rgba(139, 92, 246, 0.4);
+    --hs-secondary: #06b6d4;
+    /* Cyan-500 */
+    --hs-secondary-glow: rgba(6, 182, 212, 0.4);
+
+    /* Glass Effects */
+    --hs-glass-bg: rgba(255, 255, 255, 0.03);
+    --hs-glass-border: rgba(255, 255, 255, 0.08);
+    --hs-glass-blur: 20px;
+
+    /* Typography */
+    --hs-font-main: 'Inter', system-ui, sans-serif;
+    --hs-font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+
+    /* UI Elements */
+    --hs-ui-fg: rgba(255, 255, 255, 0.85);
+}
+
+/* === Base Styles === */
+body {
+    background:
+        radial-gradient(ellipse at top left, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at bottom right, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, #0a0a1a 0%, #0f0f2a 50%, #0a0a1a 100%);
+    background-attachment: fixed;
+}
+
+/* === Glass Components === */
+.glass,
+.card {
+    background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.05) 0%,
+            rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(var(--hs-glass-blur)) saturate(180%);
+    -webkit-backdrop-filter: blur(var(--hs-glass-blur)) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.card:hover {
+    border-color: var(--hs-accent);
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 30px var(--hs-accent-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* === Typography Enhancements === */
+h1 {
+    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 80px var(--hs-accent-glow);
+}
+
+h2,
+h3 {
+    color: var(--hs-text);
+    text-shadow: 0 0 40px var(--hs-accent-glow);
+}
+
+/* === Code Blocks === */
+pre.hljs {
+    background: linear-gradient(135deg,
+            rgba(15, 15, 42, 0.9) 0%,
+            rgba(10, 10, 26, 0.95) 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+pre.hljs::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--hs-accent), var(--hs-secondary));
+    border-radius: 12px 12px 0 0;
+}
+
+/* === Tables === */
+table {
+    background: var(--hs-glass-bg);
+    border: 1px solid var(--hs-glass-border);
+    backdrop-filter: blur(10px);
+}
+
+th {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--hs-accent);
+    border-bottom: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+tr:hover td {
+    background: rgba(139, 92, 246, 0.05);
+}
+
+/* === Callouts === */
+.callout {
+    background: var(--hs-glass-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--hs-glass-border);
+}
+
+.callout-info {
+    border-left: 4px solid var(--hs-secondary);
+    background: linear-gradient(90deg, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+}
+
+.callout-warning {
+    border-left: 4px solid #f59e0b;
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.1) 0%, transparent 50%);
+}
+
+.callout-error {
+    border-left: 4px solid #ef4444;
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.1) 0%, transparent 50%);
+}
+
+.callout-success {
+    border-left: 4px solid #22c55e;
+    background: linear-gradient(90deg, rgba(34, 197, 94, 0.1) 0%, transparent 50%);
+}
+
+/* === Progress Bar === */
+.progress-bar {
+    background: linear-gradient(90deg, var(--hs-accent), var(--hs-secondary));
+    box-shadow: 0 0 20px var(--hs-accent-glow);
+}
+
+/* === Stat Box === */
+.stat-box strong {
+    background: linear-gradient(135deg, var(--hs-accent), var(--hs-secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px var(--hs-accent-glow));
+}
+
+/* === Animations === */
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes glow-pulse {
+
+    0%,
+    100% {
+        opacity: 0.3;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Ambient orbs (optional decorative elements) */
+.ambient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: glow-pulse 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* === Scrollbar === */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--hs-accent), var(--hs-secondary));
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--hs-accent);
+}
+
+/* === Selection === */
+::selection {
+    background: var(--hs-accent);
+    color: white;
+}

@@ -1,168 +1,118 @@
-# Visual Overhaul Demo
+# UX Demo Showcase
 
 layout: statement
-A showcase of the new Premium Theme & Components.
+A complete showcase of the new UX improvements.
 
-<!-- slide_break -->
+---
 
-## Typography & Code
+<!-- layout: hero -->
+<!-- theme: glassmorphism -->
 
-This is **Inter** font. It represents a clean, modern look.
+# Glassmorphism Theme
+
+Premium frosted glass effects with ambient lighting.
+
+---
+
+## Typography & Animations
+
+This slide demonstrates **fluid typography** with `clamp()` functions.
+
+Elements appear with **staggered animations** for a polished feel.
 
 ```javascript
-// This is Fira Code
-function hello() {
-  console.log("Stunning!");
+// Code blocks are also enhanced
+function greet(name) {
+    return `Hello, ${name}!`;
 }
 ```
 
-::: callout-info
-**Glassmorphism**: The callouts and blocks now use a glassmorphic effect.
-:::
+---
+
+<!-- layout: quote -->
+
+"Design is not just what it looks like and feels like. Design is how it works."
+— Steve Jobs
 
 ---
 
-## Enhanced Tables
+<!-- layout: comparison -->
+<!-- left_label: Before -->
+<!-- right_label: After -->
 
-| Feature | Status | Priority |
-| :--- | :---: | ---: |
-| **Glass UI** | ✅ Ready | High |
-| **Typography** | ✅ Ready | Medium |
-| **Mermaid** | 🚧 WIP | Low |
-| **Animations** | ⏳ Pending | Critical |
+# Feature Comparison
+
+- Basic layouts
+- No animations
+- Plain typography
+- Limited themes
 
 ---
 
-## Grid & Cards
+- Premium layouts
+- Staggered animations
+- Fluid typography
+- Multiple themes
+
+---
+
+## Enhanced Cards & Components
 
 ::: grid-layout
 
 ::: card
 
-### 💎 Premium
+### 🎨 New Layouts
 
-Glassmorphism is baked in.
+Quote, Image Grid, Comparison layouts.
 :::
 
 ::: card
 
-### 🚀 Fast
+### ✨ Animations
 
-Powered by Alpine.js & Tailwind.
+Smooth staggered entry animations.
 :::
 
 ::: card
 
-### 🎨 Themed
+### 🌈 Themes
 
-Easy to customize CSS variables.
+Glassmorphism & more.
 :::
 
 :::
 
 ---
 
-## Stats Component
+## Stats & Progress
 
 ::: columns
 
 ::: stat-box
-**100%**
-<span>Customizable</span>
+**3**
+<span>New Layouts</span>
 :::
 
 ::: stat-box
-**Zero**
-<span>Config</span>
+**3**
+<span>Components</span>
+:::
+
+::: stat-box
+**1**
+<span>Premium Theme</span>
 :::
 
 :::
 
 ---
 
-## Mermaid Diagrams
-
-```mermaid
-graph LR
-    A[Start] --> B{Is it Pretty?}
-    B -->|Yes| C[Deploy]
-    B -->|No| D[Refine CSS]
-    D --> B
-```
-
----
-
-<!-- layout: code-focus -->
-
-# Code Focus
-
-Perfect for explaining complex logic.
-
-The code sits on the right, utilizing the full height.
-
-```javascript
-/* This code takes center stage */
-function matrix(pill) {
-  if (pill === 'red') {
-     return 'Truth';
-  }
-  return 'Ignorance';
-}
-
-const neo = new Hero();
-neo.fly();
-```
-
----
-
-<!-- theme: neon-cyber -->
 <!-- layout: statement -->
+<!-- theme: glassmorphism -->
 
-# Cyberpunk Mode
+# All Done
 
-Just add `theme: neon-cyber` to a slide (or globally).
+Your HyperSlide is now **visually stunning**.
 
-::: stat-box
-**2077**
-<span>Aesthetics</span>
-:::
-
----
-
-<!-- theme: pure-light -->
-<!-- transition: slide -->
-
-# Pure Light
-
-Also, this slide used a `slide` transition.
-
-Perfect for corporate use.
-
----
-
-<!-- layout: timeline -->
-
-# Project Roadmap
-
-- **Q1 2024**
-  Concept & Design Phase. Glassmorphism explored.
-- **Q2 2024**
-  MVP Development. CLI built.
-- **Q3 2024- **Premium Themes & Transitions**
-- **Mobile Remote & Polls**
-- **Overview Mode** (Press `O`)
-- **Mouse Navigation** (Hover edges)
-- **Zero Config**
-  Global Launch.
-
----
-
-# Video Embed
-
-::: video <https://www.youtube.com/watch?v=dQw4w9WgXcQ> :::
-
----
-
-# Live Poll
-
-::: poll Do you like the new features? | Yes, No, Absolutely! :::
+Press `?` for shortcuts.

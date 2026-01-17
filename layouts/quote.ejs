@@ -1,0 +1,33 @@
+<div class="flex flex-col items-center justify-center h-full text-center p-16 relative z-10">
+    <!-- Decorative Quote Mark -->
+    <div
+        class="absolute top-1/4 left-1/4 text-[20rem] leading-none font-serif text-white/5 select-none pointer-events-none -z-10">
+        "</div>
+
+    <blockquote class="max-w-4xl">
+        <!-- Quote Text (renders raw content) -->
+        <div
+            class="quote-text text-3xl md:text-4xl lg:text-5xl font-light italic leading-relaxed text-[var(--hs-text)]">
+            <%- content %>
+        </div>
+    </blockquote>
+
+    <!-- Ambient Glow -->
+    <div
+        class="absolute inset-0 bg-gradient-to-br from-[var(--hs-accent)]/5 via-transparent to-[var(--hs-secondary)]/5 pointer-events-none -z-10">
+    </div>
+
+    <style>
+        /* Style quote content */
+        .quote-text p {
+            margin: 0;
+        }
+
+        .quote-text p:last-child {
+            margin-top: 2rem;
+            font-size: 0.5em;
+            font-style: normal;
+            color: var(--hs-accent);
+        }
+    </style>
+</div>

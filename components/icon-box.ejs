@@ -1,0 +1,22 @@
+<div
+    class="flex flex-col items-center text-center p-6 glass rounded-2xl transition-all duration-300 hover:scale-105 hover:border-[var(--hs-accent)]/50 group">
+    <!-- Icon Container -->
+    <div
+        class="w-16 h-16 mb-5 rounded-xl bg-gradient-to-br from-[var(--hs-accent)]/20 to-[var(--hs-secondary)]/20 flex items-center justify-center border border-white/10 group-hover:border-[var(--hs-accent)]/50 transition-colors">
+        <span class="text-3xl">
+            <%= icon || '✨' %>
+        </span>
+    </div>
+
+    <!-- Title -->
+    <h3 class="text-lg font-bold mb-2 text-[var(--hs-text)]">
+        <%= title %>
+    </h3>
+
+    <!-- Description -->
+    <% if (locals.description) { %>
+        <p class="text-sm text-[var(--hs-text)]/60 leading-relaxed">
+            <%= description %>
+        </p>
+        <% } %>
+</div>

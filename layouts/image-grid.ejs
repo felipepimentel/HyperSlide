@@ -1,0 +1,37 @@
+<div class="h-full w-full p-12 flex flex-col" style="<%= bgStyle %>">
+    <!-- Image Grid Container -->
+    <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-4 auto-rows-fr image-grid-container">
+        <%- content %>
+    </div>
+
+    <style>
+        /* Style images in grid */
+        .image-grid-container h1,
+        .image-grid-container h2,
+        .image-grid-container h3 {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .image-grid-container p {
+            margin: 0;
+        }
+
+        .image-grid-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .image-grid-container img:hover {
+            transform: scale(1.02);
+            border-color: var(--hs-accent);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3),
+                0 0 15px var(--hs-accent-glow);
+        }
+    </style>
+</div>

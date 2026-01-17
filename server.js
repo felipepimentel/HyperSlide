@@ -17,6 +17,15 @@ function startServer(options = {}) {
 
     let currentSlideIndex = 0;
     let reloadClients = [];
+    let sseClients = [];
+
+    // Broadcast function for SSE
+    function broadcast(data) {
+        const message = `data: ${JSON.stringify(data)}\n\n`;
+        sseClients.forEach(client => {
+            client.write(message);
+        });
+    }
 
     // Check for local style.css
     const localStylePath = path.join(ROOT_DIR, 'style.css');
@@ -78,6 +87,20 @@ function startServer(options = {}) {
     app.get('/slides', (req, res) => {
         const html = renderer.getAllSlides(slidesPath);
         res.send(html);
+    });
+
+    // SSE endpoint for hot-reload and sync
+    app.get('/sse', (req, res) => {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        sseClients.push(res);
+
+        req.on('close', () => {
+            sseClients = sseClients.filter(client => client !== res);
+        });
     });
 
     // Global File Watcher
