@@ -4,6 +4,7 @@ const path = require('path');
 const chokidar = require('chokidar');
 const open = require('open');
 const renderer = require('./lib/renderer');
+const ejs = require('ejs'); // Ensure ejs is required if not already used globally, though it's used in renderer.js
 
 function startServer(options = {}) {
     const PORT = options.port || 3000;
@@ -23,353 +24,47 @@ function startServer(options = {}) {
 
     // --- Routes ---
 
+    // Serve internal client scripts
+    app.use('/_internal', express.static(path.join(__dirname, 'lib/client')));
+
     // Serve static files from root (Obsidian friendly: serves images relative to slides.md)
     app.use(express.static(ROOT_DIR));
 
     app.get('/', (req, res) => {
         const slidesContent = fs.readFileSync(slidesPath, 'utf8');
-        const slideCount = slidesContent.split(/\n-{3,}\n/).length;
+        const slideCount = renderer.getAllSlides(slidesPath).split(/(?=<div x-show="current ===)/).length - 1;
+        // Note: The previous split logic was rudimentary. Since getAllSlides returns HTML, we essentially just rely on rendering it.
+        // However, standard server-side counting for initial state is fine.
+        // Let's rely on the simple split for count or better, just use the getAllSlides length if we could inspect it, 
+        // but getAllSlides returns a string.
+        // For accurate count without rendering everything twice, let's just stick to the simple regex on raw markdown for now,
+        // or let Alpine calculate it on client side fully (which we are doing via data-index).
+        // Passing an estimated count to `total` is helpful for initial render though.
+        const estimatedCount = slidesContent.split(/\n-{3,}\n/).length;
 
-        res.send(`
-<!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900 text-slate-100">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HyperSlide</title>
-    
-    <!-- Scripts -->
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.5"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js"></script>
-    
-    <!-- Code Highlight -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+        const templatePath = path.join(__dirname, 'templates', 'index.ejs');
 
-    ${localStyle}
-
-    <!-- Mermaid -->
-    <!-- Mermaid -->
-    <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-        mermaid.initialize({ startOnLoad: false, theme: 'dark' });
-        window.mermaid = mermaid;
-    </script>
-
-    <style>
-        :root {
-            --hs-accent: #3b82f6;
-            --hs-bg: #0f172a;
-            --hs-ui-fg: #94a3b8;
-            --hs-sidebar-bg: rgba(15, 23, 42, 0.8);
-        }
-
-        /* Custom Table & Callouts */
-        table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-        th, td { border: 1px solid #475569; padding: 0.5em; text-align: left; }
-        th { background-color: rgba(30, 41, 59, 0.5); }
-        
-        .callout { border-left-width: 4px; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; background-color: rgba(30, 41, 59, 0.5); }
-        .callout-info { border-color: #3b82f6; }
-        .callout-warning { border-color: #eab308; }
-        .callout-error { border-color: #ef4444; }
-        .callout-success { border-color: #22c55e; }
-
-        /* Minimalist Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            height: 100%;
-            width: 300px;
-            background: var(--hs-sidebar-bg);
-            backdrop-filter: blur(16px);
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
-        }
-        .sidebar.open { transform: translateX(0); }
-        
-        /* Auto-hide UI components */
-        .ui-element {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .ui-hidden { opacity: 0; visibility: hidden; }
-    </style>
-
-    <!-- Alpine Store -->
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('slideshow', () => ({
-                current: 0,
-                total: ${slideCount},
-                showHelp: false,
-                lastMove: Date.now(),
-                isIdle: false,
-                
-                init() {
-                    const hash = window.location.hash.replace('#', '');
-                    if (hash !== '') this.current = parseInt(hash) || 0;
-
-                    this.$watch('current', val => {
-                        window.location.hash = val;
-                    });
-                    
-                    const processMermaid = () => {
-                        document.querySelectorAll('pre code.language-mermaid').forEach(code => {
-                            const pre = code.parentElement;
-                            const div = document.createElement('div');
-                            div.className = 'mermaid';
-                            div.textContent = code.textContent;
-                            pre.replaceWith(div);
-                        });
-                        if (window.mermaid) window.mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
-                    };
-
-                    document.body.addEventListener('htmx:afterSwap', () => {
-                       this.total = document.querySelectorAll('[data-index]').length;
-                       hljs.highlightAll();
-                       processMermaid();
-                    });
-                    
-                    hljs.highlightAll();
-                    setTimeout(processMermaid, 200);
-
-                    // Idle detection
-                    setInterval(() => {
-                        if (Date.now() - this.lastMove > 3000) this.isIdle = true;
-                    }, 1000);
-                },
-
-                userActive() {
-                    this.lastMove = Date.now();
-                    this.isIdle = false;
-                },
-
-                next() { if (this.current < this.total - 1) this.current++; },
-                prev() { if (this.current > 0) this.current--; }
-            }));
-        });
-        
-        const source = new EventSource('/reload');
-        source.onmessage = (e) => {
-            if (e.data === 'reload') document.getElementById('slide-container').dispatchEvent(new Event('slides-changed'));
-            else if (e.data.startsWith('sync:')) {
-                const slideshow = Alpine.$data(document.body);
-                if (slideshow) slideshow.current = parseInt(e.data.split(':')[1]);
+        ejs.renderFile(templatePath, {
+            slideCount: estimatedCount, // This might be slightly off if using header-based splitting, but client-side fixes it instantly
+            localStyle: localStyle
+        }, (err, str) => {
+            if (err) {
+                res.status(500).send(`Template Error: ${err.message}`);
+                return;
             }
-        };
-    </script>
-</head>
-<body x-data="slideshow" 
-      @mousemove.window="userActive()"
-      @keydown.window="userActive()"
-      @keydown.right.window="next()" 
-      @keydown.left.window="prev()"
-      @keydown.?.window="showHelp = !showHelp"
-      @keydown.escape.window="showHelp = false"
-      class="h-full overflow-hidden antialiased bg-[var(--hs-bg)] relative">
-
-    <!-- Main Stage -->
-    <main id="slide-container" 
-          class="w-full h-full relative overflow-hidden"
-          hx-get="/slides" 
-          hx-trigger="load, slides-changed" 
-          hx-swap="innerHTML">
-          <div class="flex items-center justify-center h-full text-2xl text-slate-500 animate-pulse">Loading...</div>
-    </main>
-
-    <!-- Progress (Minimalist) -->
-    <div class="fixed bottom-0 left-0 w-full h-0.5 bg-white/5 ui-element" :class="isIdle && 'ui-hidden'">
-        <div class="h-full bg-[var(--hs-accent)] transition-all duration-500 ease-out shadow-[0_0_8px_var(--hs-accent)]"
-             :style="'width: ' + ((current + 1) / total * 100) + '%'"></div>
-    </div>
-
-    <!-- Minimalist Sidebar Shortcuts -->
-    <div class="sidebar" :class="showHelp && 'open'">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-[var(--hs-ui-fg)]">Key Bindings</h2>
-                <button @click="showHelp = false" class="text-[var(--hs-ui-fg)] hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            
-            <div class="space-y-6">
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Next Slide</span>
-                    <kbd class="text-[var(--hs-accent)] font-mono">→</kbd>
-                </div>
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Prev Slide</span>
-                    <kbd class="text-[var(--hs-accent)] font-mono">←</kbd>
-                </div>
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Shortcuts</span>
-                    <kbd class="text-[var(--hs-accent)] font-mono">?</kbd>
-                </div>
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Speaker View</span>
-                    <span class="text-[10px] text-[var(--hs-accent)] opacity-70 uppercase">/speaker</span>
-                </div>
-            </div>
-
-            <div class="mt-auto text-[10px] text-center text-white/20 tracking-widest uppercase">
-                HyperSlide Refined
-            </div>
-        </div>
-    </div>
-
-    <!-- Hover Hint (Bottom Right) -->
-    <div class="fixed bottom-4 right-4 flex items-center gap-4 ui-element" :class="isIdle && 'ui-hidden'">
-        <div class="text-[var(--hs-ui-fg)] text-[10px] font-mono tracking-tighter opacity-70">
-            <span x-text="(current + 1)"></span> / <span x-text="total"></span>
-        </div>
-        <button @click="showHelp = true" class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-[10px] text-[var(--hs-ui-fg)] hover:bg-white/5 transition-colors">
-            ?
-        </button>
-    </div>
-
-</body>
-</html>
-    `);
+            res.send(str);
+        });
     });
 
     app.get('/speaker', (req, res) => {
-        res.send(`
-<!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900 text-slate-100">
-<head>
-    <meta charset="UTF-8">
-    <title>HyperSlide - Speaker View</title>
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js"></script>
-    <style>
-        .preview-frame { border: 2px solid #334155; border-radius: 8px; overflow: hidden; position: relative; background: #0f172a; }
-        .notes-container { font-size: 1.25rem; line-height: 1.6; }
-        .notes-container h1, .notes-container h2 { color: #3b82f6; font-weight: bold; margin-top: 1rem; }
-    </style>
-    <script>
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('speakerView', () => ({
-                current: 0,
-                total: 0,
-                notes: '',
-                timer: 0,
-                timerStarted: false,
-                slides: [],
-                
-                init() {
-                    this.fetchSlides();
-                    
-                    const source = new EventSource('/reload');
-                    source.onmessage = (event) => {
-                        if (event.data === 'reload') {
-                            this.fetchSlides();
-                        } else if (event.data.startsWith('sync:')) {
-                            const newIndex = parseInt(event.data.split(':')[1]);
-                            if (newIndex !== this.current) {
-                                this.current = newIndex;
-                                this.updateNotes();
-                            }
-                        }
-                    };
-
-                    setInterval(() => {
-                        if (this.timerStarted) this.timer++;
-                    }, 1000);
-                },
-
-                async fetchSlides() {
-                    const res = await fetch('/slides');
-                    const html = await res.text();
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    this.slides = Array.from(doc.querySelectorAll('.slide-content')).map(el => ({
-                        html: el.innerHTML,
-                        notes: el.querySelector('.speaker-notes').innerHTML
-                    }));
-                    this.total = this.slides.length;
-                    this.updateNotes();
-                },
-
-                updateNotes() {
-                    if (this.slides[this.current]) {
-                        this.notes = this.slides[this.current].notes || '<p class="text-slate-500">No notes for this slide.</p>';
-                    }
-                },
-
-                async sync(index) {
-                    this.current = index;
-                    this.updateNotes();
-                    await fetch('/sync', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ index })
-                    });
-                },
-
-                next() { if (this.current < this.total - 1) this.sync(this.current + 1); },
-                prev() { if (this.current > 0) this.sync(this.current - 1); },
-                formatTime(s) {
-                    const mins = Math.floor(s / 60);
-                    const secs = s % 60;
-                    return \`\${mins.toString().padStart(2, '0')}:\${secs.toString().padStart(2, '0')}\`;
-                }
-            }));
+        const templatePath = path.join(__dirname, 'templates', 'speaker.ejs');
+        ejs.renderFile(templatePath, {}, (err, str) => {
+            if (err) {
+                res.status(500).send(`Template Error: ${err.message}`);
+                return;
+            }
+            res.send(str);
         });
-    </script>
-</head>
-<body x-data="speakerView" 
-      @keydown.right.window="next()" 
-      @keydown.left.window="prev()"
-      @keydown.space.window="timerStarted = !timerStarted"
-      class="h-full grid grid-cols-12 gap-4 p-6 overflow-hidden">
-
-    <!-- Left: Preview & Next -->
-    <div class="col-span-4 flex flex-col gap-4">
-        <div class="flex-1 flex flex-col">
-            <h2 class="text-xs font-bold text-slate-500 uppercase mb-2">Current Slide</h2>
-            <div class="preview-frame flex-1 relative flex items-center justify-center text-center p-4">
-               <div class="transform scale-50 w-[200%] h-[200%] absolute origin-center flex items-center justify-center" x-html="slides[current]?.html"></div>
-            </div>
-        </div>
-        <div class="flex-1 flex flex-col">
-            <h2 class="text-xs font-bold text-slate-500 uppercase mb-2">Next Slide</h2>
-            <div class="preview-frame flex-1 relative flex items-center justify-center text-center p-4 opacity-50">
-               <div class="transform scale-50 w-[200%] h-[200%] absolute origin-center flex items-center justify-center" x-html="slides[current + 1]?.html"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Right: Notes & Controls -->
-    <div class="col-span-8 flex flex-col gap-4 border-l border-slate-800 pl-6">
-        <div class="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl">
-             <div class="text-4xl font-mono text-blue-400" x-text="formatTime(timer)"></div>
-             <div class="text-xl font-bold">
-                Slide <span x-text="current + 1"></span> / <span x-text="total"></span>
-             </div>
-             <div class="flex gap-2">
-                <button @click="prev()" class="px-4 py-2 bg-slate-700 rounded hover:bg-slate-600">Prev</button>
-                <button @click="next()" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">Next</button>
-             </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto bg-slate-950/50 p-8 rounded-xl border border-slate-800/50">
-            <h2 class="text-xs font-bold text-slate-500 uppercase mb-4 sticky top-0 bg-slate-900 py-2">Speaker Notes</h2>
-            <div class="notes-container prose prose-invert max-w-none" x-html="notes"></div>
-        </div>
-        
-        <div class="text-xs text-slate-600 text-center">
-            Space: Toggle Timer | Arrows: Navigate
-        </div>
-    </div>
-
-</body>
-</html>
-        `);
     });
 
     app.post('/sync', (req, res) => {
@@ -402,11 +97,14 @@ function startServer(options = {}) {
         const watcher = chokidar.watch([
             slidesPath,
             path.join(ROOT_DIR, 'templates'),
-            path.join(ROOT_DIR, 'layouts')
+            path.join(ROOT_DIR, 'layouts'),
+            path.join(ROOT_DIR, 'style.css'),
+            path.join(__dirname, 'templates'), // Watch internal templates too
+            path.join(__dirname, 'lib/client') // Watch internal client scripts
         ]);
 
-        watcher.on('change', () => {
-            console.log('File changed, reloading...');
+        watcher.on('change', (path) => {
+            console.log(`File changed: ${path}, reloading...`);
             sendEvent();
         });
 
