@@ -46,7 +46,9 @@ function startServer(options = {}) {
 
         ejs.renderFile(templatePath, {
             slideCount: estimatedCount, // This might be slightly off if using header-based splitting, but client-side fixes it instantly
-            localStyle: localStyle
+            localStyle: localStyle,
+            isDev: true,
+            scriptPath: '/_internal'
         }, (err, str) => {
             if (err) {
                 res.status(500).send(`Template Error: ${err.message}`);
