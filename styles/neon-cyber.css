@@ -1,0 +1,36 @@
+:root {
+    --hs-bg: #0b0014;
+    --hs-text: #e0f2fe;
+    --hs-accent: #f000ff;
+    /* Neon Magenta */
+    --hs-accent-glow: #f000ff99;
+    --hs-secondary: #00ffff;
+    /* Cyan */
+
+    --hs-glass-bg: rgba(20, 0, 30, 0.7);
+    --hs-glass-border: rgba(240, 0, 255, 0.3);
+    --hs-glass-blur: 8px;
+
+    --hs-font-main: 'Orbitron', 'Inter', sans-serif;
+    --hs-font-mono: 'Fira Code', monospace;
+}
+
+body {
+    background:
+        repeating-linear-gradient(0deg, transparent, transparent 1px, #f000ff22 1px, #f000ff22 2px),
+        linear-gradient(to bottom, #0b0014, #1a0029);
+    background-size: 100% 4px, 100% 100%;
+}
+
+h1,
+h2,
+h3 {
+    text-shadow: 0 0 10px var(--hs-accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.card {
+    border: 1px solid var(--hs-accent);
+    box-shadow: 0 0 15px var(--hs-accent-glow);
+}

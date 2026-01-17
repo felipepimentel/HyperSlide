@@ -1,77 +1,141 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-900 text-slate-100">
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
 
 <head>
     <meta charset="UTF-8">
     <title>HyperSlide - Speaker View</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:wght@300..900&display=swap"
+        rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js"></script>
+
     <style>
+        :root {
+            /* Consistent Palette with Main View */
+            --hs-accent: #3b82f6;
+            --hs-ui-fg: #94a3b8;
+            --hs-font-main: 'Inter', sans-serif;
+            --hs-font-mono: 'Fira Code', monospace;
+        }
+
+        body {
+            font-family: var(--hs-font-main);
+            background: radial-gradient(circle at top center, #0f172a 0%, #020617 100%);
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
         .preview-frame {
-            border: 2px solid #334155;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             overflow: hidden;
             position: relative;
-            background: #0f172a;
+            background: #000;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         .notes-container {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             line-height: 1.6;
+            color: #cbd5e1;
         }
 
         .notes-container h1,
         .notes-container h2 {
-            color: #3b82f6;
-            font-weight: bold;
+            color: var(--hs-accent);
+            font-weight: 700;
             margin-top: 1rem;
+            font-size: 1.2em;
+        }
+
+        .timer-display {
+            font-family: var(--hs-font-mono);
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }
     </style>
     <script src="/_internal/speaker.js"></script>
 </head>
 
 <body x-data="speakerView" @keydown.right.window="next()" @keydown.left.window="prev()"
-    @keydown.space.window="timerStarted = !timerStarted" class="h-full grid grid-cols-12 gap-4 p-6 overflow-hidden">
+    @keydown.space.window="timerStarted = !timerStarted" class="h-full grid grid-cols-12 gap-6 p-6 overflow-hidden">
 
     <!-- Left: Preview & Next -->
-    <div class="col-span-4 flex flex-col gap-4">
-        <div class="flex-1 flex flex-col">
-            <h2 class="text-xs font-bold text-slate-500 uppercase mb-2">Current Slide</h2>
-            <div class="preview-frame flex-1 relative flex items-center justify-center text-center p-4">
-                <div class="transform scale-50 w-[200%] h-[200%] absolute origin-center flex items-center justify-center"
+    <div class="col-span-4 flex flex-col gap-6">
+        <div class="flex-1 flex flex-col min-h-0">
+            <h2 class="text-xs font-bold text-blue-400 tracking-widest uppercase mb-3 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                Current Slide
+            </h2>
+            <div class="preview-frame flex-1 relative flex items-center justify-center text-center">
+                <div class="transform scale-50 w-[200%] h-[200%] absolute origin-center flex items-center justify-center pointer-events-none select-none"
                     x-html="slides[current]?.html"></div>
             </div>
         </div>
-        <div class="flex-1 flex flex-col">
-            <h2 class="text-xs font-bold text-slate-500 uppercase mb-2">Next Slide</h2>
-            <div class="preview-frame flex-1 relative flex items-center justify-center text-center p-4 opacity-50">
-                <div class="transform scale-50 w-[200%] h-[200%] absolute origin-center flex items-center justify-center"
+        <div class="h-1/3 flex flex-col min-h-0">
+            <h2 class="text-xs font-bold text-slate-500 tracking-widest uppercase mb-3">Next Slide</h2>
+            <div
+                class="preview-frame flex-1 relative flex items-center justify-center text-center opacity-40 grayscale">
+                <div class="transform scale-50 w-[200%] h-[200%] absolute origin-center flex items-center justify-center pointer-events-none select-none"
                     x-html="slides[current + 1]?.html"></div>
             </div>
         </div>
     </div>
 
     <!-- Right: Notes & Controls -->
-    <div class="col-span-8 flex flex-col gap-4 border-l border-slate-800 pl-6">
-        <div class="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl">
-            <div class="text-4xl font-mono text-blue-400" x-text="formatTime(timer)"></div>
-            <div class="text-xl font-bold">
-                Slide <span x-text="current + 1"></span> / <span x-text="total"></span>
+    <div class="col-span-8 flex flex-col gap-6">
+        <!-- Dashboard -->
+        <div class="glass-panel p-5 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="text-5xl font-bold text-white timer-display cursor-pointer hover:text-blue-400 transition-colors"
+                    @click="timerStarted = !timerStarted" :class="timerStarted ? 'opacity-100' : 'opacity-50'"
+                    x-text="formatTime(timer)"></div>
+                <div class="text-xs text-slate-500 uppercase tracking-widest flex flex-col">
+                    <span>Elapsed</span>
+                    <span x-text="timerStarted ? 'Running' : 'Paused'"
+                        :class="timerStarted ? 'text-green-500' : 'text-orange-500'"></span>
+                </div>
             </div>
-            <div class="flex gap-2">
-                <button @click="prev()" class="px-4 py-2 bg-slate-700 rounded hover:bg-slate-600">Prev</button>
-                <button @click="next()" class="px-4 py-2 bg-blue-600 rounded hover:bg-blue-500">Next</button>
+
+            <div class="text-2xl font-bold text-slate-300">
+                <span class="text-slate-600">#</span><span x-text="current + 1"></span> <span
+                    class="text-slate-600 text-lg">/ <span x-text="total"></span></span>
+            </div>
+
+            <div class="flex gap-3">
+                <button @click="prev()"
+                    class="px-6 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium transition-colors border border-slate-700">Prev</button>
+                <button @click="next()"
+                    class="px-6 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-[0_0_15px_rgba(37,99,235,0.3)] transition-all">Next</button>
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto bg-slate-950/50 p-8 rounded-xl border border-slate-800/50">
-            <h2 class="text-xs font-bold text-slate-500 uppercase mb-4 sticky top-0 bg-slate-900 py-2">Speaker Notes
-            </h2>
-            <div class="notes-container prose prose-invert max-w-none" x-html="notes"></div>
+        <!-- Notes -->
+        <div class="glass-panel flex-1 overflow-hidden relative flex flex-col">
+            <div class="p-4 border-b border-white/5 bg-slate-900/50 flex justify-between items-center">
+                <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Speaker Notes</h2>
+                <span class="text-[10px] text-slate-600 font-mono">SCROLLABLE</span>
+            </div>
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+                <div class="notes-container prose prose-invert max-w-none"
+                    x-html="notes || '<p class=\'text-slate-600 italic text-center mt-10\'>No notes for this slide.</p>'">
+                </div>
+            </div>
         </div>
 
-        <div class="text-xs text-slate-600 text-center">
-            Space: Toggle Timer | Arrows: Navigate
+        <div class="text-[10px] text-slate-600 text-center font-mono uppercase tracking-[0.2em] opacity-50">
+            HyperSlide Control Deck
         </div>
     </div>
 

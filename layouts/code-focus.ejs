@@ -1,0 +1,37 @@
+<div class="grid grid-cols-1 md:grid-cols-[40%_60%] h-full w-full">
+    <!-- Left: Explanation (Prose) -->
+    <!-- We target non-pre elements to be on the left via CSS order or grid placement? 
+         Too hard. Let's rely on standard flow: Text then Code.
+         And we style the container to be a grid.
+    -->
+    <style>
+        .slide-code-focus {
+            display: grid;
+            grid-template-columns: 35% 1fr;
+            height: 100%;
+        }
+
+        .slide-code-focus>*:not(pre) {
+            padding: 2rem;
+            align-self: center;
+        }
+
+        .slide-code-focus>pre {
+            grid-column: 2;
+            grid-row: 1 / 99;
+            height: 100%;
+            margin: 0 !important;
+            border-radius: 0 !important;
+            border-left: 1px solid var(--hs-glass-border);
+        }
+
+        .slide-code-focus>pre>code {
+            height: 100%;
+            font-size: 0.85em;
+        }
+    </style>
+
+    <div class="slide-code-focus w-full h-full bg-black/10">
+        <%- content %>
+    </div>
+</div>

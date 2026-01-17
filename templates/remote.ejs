@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-900 text-white">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HyperSlide Remote</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="h-full flex flex-col" x-data="remote">
+    <!-- Header -->
+    <header class="p-4 bg-slate-800 border-b border-white/10 flex justify-between items-center">
+        <h1 class="font-bold text-lg tracking-wider">HYPERSLIDE</h1>
+        <div class="text-xs font-mono opacity-50">REMOTE</div>
+    </header>
+
+    <!-- Main Controls -->
+    <main class="flex-1 flex flex-col p-6 gap-6">
+
+        <!-- Big Navigation Buttons -->
+        <div class="flex-1 grid grid-cols-2 gap-6">
+            <button @click="send('prev')"
+                class="bg-slate-800 rounded-2xl border border-white/5 active:scale-95 transition-transform flex items-center justify-center">
+                <svg class="w-12 h-12 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+            <button @click="send('next')"
+                class="bg-blue-600 rounded-2xl border border-white/5 active:scale-95 transition-transform flex items-center justify-center shadow-lg shadow-blue-900/50">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="grid grid-cols-3 gap-4 h-24">
+            <button @click="send('goto', 0)"
+                class="bg-slate-800 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-widest active:bg-slate-700">Start</button>
+            <button @click="location.reload()"
+                class="bg-slate-800 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-widest active:bg-slate-700">Refresh</button>
+            <button
+                class="bg-slate-800 rounded-xl border border-white/5 text-xs font-bold uppercase tracking-widest active:bg-slate-700 opacity-50 cursor-not-allowed">Blank</button>
+        </div>
+
+    </main>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('remote', () => ({
+                async send(action, index = null) {
+                    await fetch('/api/control', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action, index })
+                    });
+
+                    // Haptic feedback if available
+                    if (navigator.vibrate) navigator.vibrate(50);
+                }
+            }));
+        });
+    </script>
+</body>
+
+</html>

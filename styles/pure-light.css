@@ -1,0 +1,49 @@
+:root {
+    /* Pure Light Theme */
+    --hs-bg: #ffffff;
+    --hs-text: #1e293b;
+    /* Slate-800 */
+    --hs-accent: #2563eb;
+    /* Blue-600 */
+    --hs-accent-glow: rgba(37, 99, 235, 0.2);
+    --hs-secondary: #4f46e5;
+    /* Indigo-600 */
+
+    --hs-glass-bg: rgba(255, 255, 255, 0.7);
+    --hs-glass-border: rgba(0, 0, 0, 0.05);
+    --hs-glass-blur: 16px;
+
+    --hs-font-main: 'Inter', sans-serif;
+    --hs-font-mono: 'Fira Code', monospace;
+
+    --hs-ui-fg: #64748b;
+    /* Slate-500 */
+}
+
+body {
+    background: radial-gradient(circle at top left, #f8fafc 0%, #ffffff 100%);
+}
+
+/* Override code block background for better contrast in light mode */
+pre code.hljs {
+    background: #f1f5f9 !important;
+    /* Slate-100 */
+    color: #334155 !important;
+    border: 1px solid #e2e8f0;
+}
+
+/* Make glass elements pop with subtle shadows */
+.glass,
+.card,
+table {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+/* Stat box number gradient */
+.stat-box strong {
+    background: linear-gradient(135deg, var(--hs-accent), var(--hs-secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}

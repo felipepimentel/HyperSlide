@@ -72,57 +72,42 @@ function startServer(options = {}) {
     app.post('/sync', (req, res) => {
         currentSlideIndex = req.body.index;
         reloadClients.forEach(client => {
-            client.res.write(`data: sync:${currentSlideIndex}\n\n`);
+            // reloadClients.forEach(client => { // This was for old reloadClients
+            //     client.res.write(`data: sync:${currentSlideIndex}\n\n`);
+            // });
+            broadcast({ type: 'sync', index: currentSlideIndex }); // Use new broadcast
+            res.sendStatus(200);
         });
-        res.sendStatus(200);
-    });
 
-    app.get('/slides', (req, res) => {
-        const html = renderer.getAllSlides(slidesPath);
-        res.send(html);
-    });
+        app.get('/slides', (req, res) => {
+            const html = renderer.getAllSlides(slidesPath);
+            res.send(html);
+        });
 
-    // SSE Endpoint for Hot Reload
-    app.get('/reload', (req, res) => {
-        res.setHeader('Content-Type', 'text/event-stream');
-        res.setHeader('Cache-Control', 'no-cache');
-        res.setHeader('Connection', 'keep-alive');
-
-        const clientId = Date.now();
-        const newClient = { id: clientId, res };
-        reloadClients.push(newClient);
-
-        const sendEvent = (data = 'reload') => {
-            res.write(`data: ${data}\n\n`);
-        };
-
-        const watcher = chokidar.watch([
-            slidesPath,
-            path.join(ROOT_DIR, 'templates'),
-            path.join(ROOT_DIR, 'layouts'),
+        path.join(ROOT_DIR, 'layouts'),
             path.join(ROOT_DIR, 'style.css'),
             path.join(__dirname, 'templates'), // Watch internal templates too
             path.join(__dirname, 'lib/client') // Watch internal client scripts
         ]);
 
-        watcher.on('change', (path) => {
-            console.log(`File changed: ${path}, reloading...`);
-            sendEvent();
-        });
-
-        req.on('close', () => {
-            watcher.close();
-            reloadClients = reloadClients.filter(c => c.id !== clientId);
-            res.end();
-        });
+    watcher.on('change', (path) => {
+        console.log(`File changed: ${path}, reloading...`);
+        sendEvent();
     });
 
-    app.listen(PORT, async () => {
-        console.log(`🚀 HyperSlide running at http://localhost:${PORT}`);
-        if (options.open) {
-            await open(`http://localhost:${PORT}`);
-        }
+    req.on('close', () => {
+        watcher.close();
+        reloadClients = reloadClients.filter(c => c.id !== clientId);
+        res.end();
     });
+});
+
+app.listen(PORT, async () => {
+    console.log(`🚀 HyperSlide running at http://localhost:${PORT}`);
+    if (options.open) {
+        await open(`http://localhost:${PORT}`);
+    }
+});
 }
 
 module.exports = { startServer };

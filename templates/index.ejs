@@ -11,83 +11,183 @@
     <script src="https://unpkg.com/htmx.org@1.9.5"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.0/dist/cdn.min.js"></script>
 
-    <!-- Code Highlight -->
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Inter:wght@300..900&display=swap"
+        rel="stylesheet">
+
+    <!-- Code Highlight (Server-side rendered, just need CSS) -->
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Removed client-side highlight.js script -->
+
 
     <%- localStyle %>
 
         <!-- Mermaid -->
         <script type="module">
             import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
-            mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'base',
+                themeVariables: {
+                    darkMode: true,
+                    background: '#1e293b00', /* Transparent */
+                    primaryColor: '#3b82f6',
+                    primaryTextColor: '#f1f5f9',
+                    secondaryColor: '#6366f1',
+                    lineColor: '#94a3b8',
+                    fontFamily: 'Fira Code'
+                }
+            });
             window.mermaid = mermaid;
         </script>
 
         <style>
             :root {
+                /* Premium Dark Theme Palette */
+                --hs-bg: #030712;
+                /* Deep almost-black blue */
+                --hs-text: #f8fafc;
                 --hs-accent: #3b82f6;
-                --hs-bg: #0f172a;
-                --hs-ui-fg: #94a3b8;
-                --hs-sidebar-bg: rgba(15, 23, 42, 0.8);
+                /* Blue-500 */
+                --hs-accent-glow: #3b82f688;
+                --hs-secondary: #6366f1;
+                /* Indigo-500 */
+
+                --hs-glass-bg: rgba(15, 23, 42, 0.6);
+                --hs-glass-border: rgba(255, 255, 255, 0.08);
+                --hs-glass-blur: 12px;
+
+                --hs-font-main: 'Inter', sans-serif;
+                --hs-font-mono: 'Fira Code', monospace;
             }
 
-            /* Custom Table & Callouts */
+            body {
+                font-family: var(--hs-font-main);
+                color: var(--hs-text);
+                background: radial-gradient(circle at top center, #111827 0%, #030712 100%);
+            }
+
+            /* Typography Overrides */
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+                font-weight: 800;
+                letter-spacing: -0.025em;
+            }
+
+            code,
+            pre {
+                font-family: var(--hs-font-mono) !important;
+            }
+
+            /* Glassmorphism Utilities */
+            .glass {
+                background: var(--hs-glass-bg);
+                backdrop-filter: blur(var(--hs-glass-blur));
+                border: 1px solid var(--hs-glass-border);
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+
+            /* Enhanced Tables */
             table {
                 width: 100%;
-                border-collapse: collapse;
-                margin: 1em 0;
-            }
-
-            th,
-            td {
-                border: 1px solid #475569;
-                padding: 0.5em;
-                text-align: left;
+                border-collapse: separate;
+                border-spacing: 0;
+                margin: 2em 0;
+                border-radius: 12px;
+                overflow: hidden;
+                background: var(--hs-glass-bg);
+                border: 1px solid var(--hs-glass-border);
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
             }
 
             th {
-                background-color: rgba(30, 41, 59, 0.5);
+                background: rgba(255, 255, 255, 0.03);
+                font-weight: 600;
+                text-transform: uppercase;
+                font-size: 0.75rem;
+                letter-spacing: 0.1em;
+                color: #94a3b8;
+                padding: 1rem 1.5rem;
+                text-align: left;
+                border-bottom: 1px solid var(--hs-glass-border);
             }
 
+            td {
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+                font-size: 0.95rem;
+                color: #e2e8f0;
+            }
+
+            tr:last-child td {
+                border-bottom: none;
+            }
+
+            tr:hover td {
+                background: rgba(255, 255, 255, 0.02);
+            }
+
+            /* Callouts */
             .callout {
                 border-left-width: 4px;
                 border-radius: 0.5rem;
-                padding: 1rem;
-                margin: 1rem 0;
-                background-color: rgba(30, 41, 59, 0.5);
+                padding: 1.25rem;
+                margin: 1.5rem 0;
+                background: rgba(15, 23, 42, 0.4);
+                border: 1px solid var(--hs-glass-border);
+                border-left-width: 4px;
             }
 
             .callout-info {
-                border-color: #3b82f6;
+                border-left-color: #3b82f6;
+                background: rgba(59, 130, 246, 0.05);
             }
 
             .callout-warning {
-                border-color: #eab308;
+                border-left-color: #eab308;
+                background: rgba(234, 179, 8, 0.05);
             }
 
             .callout-error {
-                border-color: #ef4444;
+                border-left-color: #ef4444;
+                background: rgba(239, 68, 68, 0.05);
             }
 
             .callout-success {
-                border-color: #22c55e;
+                border-left-color: #22c55e;
+                background: rgba(34, 197, 94, 0.05);
             }
 
-            /* Minimalist Sidebar */
+            .callout h3 {
+                margin-top: 0;
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            /* Sidebar Refined */
             .sidebar {
                 position: fixed;
                 top: 0;
                 right: 0;
                 height: 100%;
-                width: 300px;
-                background: var(--hs-sidebar-bg);
-                backdrop-filter: blur(16px);
-                border-left: 1px solid rgba(255, 255, 255, 0.05);
+                width: 320px;
+                background: rgba(3, 7, 18, 0.95);
+                backdrop-filter: blur(20px);
+                border-left: 1px solid var(--hs-glass-border);
                 transform: translateX(100%);
-                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                /* Ease-out-expo */
                 z-index: 100;
+                box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
             }
 
             .sidebar.open {
@@ -96,12 +196,118 @@
 
             /* Auto-hide UI components */
             .ui-element {
-                transition: opacity 0.3s ease, visibility 0.3s ease;
+                transition: opacity 0.4s ease, visibility 0.4s ease;
             }
 
             .ui-hidden {
                 opacity: 0;
                 visibility: hidden;
+            }
+
+            /* Component System */
+            .card {
+                background: var(--hs-glass-bg);
+                backdrop-filter: blur(var(--hs-glass-blur));
+                border: 1px solid var(--hs-glass-border);
+                border-radius: 12px;
+                padding: 1.5rem;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+                border-color: rgba(255, 255, 255, 0.15);
+            }
+
+            .grid-layout {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 2rem;
+                margin: 2rem 0;
+            }
+
+            .stat-box {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                padding: 2rem;
+            }
+
+            .stat-box strong {
+                font-size: 4rem;
+                line-height: 1;
+                font-weight: 900;
+                background: linear-gradient(135deg, var(--hs-accent), var(--hs-secondary));
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                margin-bottom: 0.5rem;
+            }
+
+            .stat-box span {
+                font-size: 1rem;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                color: var(--hs-ui-fg);
+            }
+
+            .columns {
+                display: flex;
+                gap: 2rem;
+                align-items: flex-start;
+                margin: 2rem 0;
+            }
+
+            .columns>* {
+                flex: 1;
+            }
+
+            /* Progress Bar */
+            .progress-bar {
+                background: linear-gradient(90deg, var(--hs-accent), var(--hs-secondary));
+                box-shadow: 0 0 15px var(--hs-accent-glow);
+            }
+
+            @media print {
+
+                .sidebar,
+                .progress-bar,
+                .ui-element,
+                .no-print {
+                    display: none !important;
+                }
+
+                body,
+                html {
+                    height: auto !important;
+                    overflow: visible !important;
+                }
+
+                #slide-container {
+                    position: static !important;
+                    height: auto !important;
+                    overflow: visible !important;
+                }
+
+                .slide-content {
+                    position: relative !important;
+                    height: 100vh !important;
+                    width: 100vw !important;
+                    page-break-after: always !important;
+                    break-after: page !important;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    background: var(--hs-bg) !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+
+                /* Show all slides */
+                [x-show] {
+                    display: block !important;
+                }
             }
         </style>
 
@@ -124,8 +330,8 @@
     </main>
 
     <!-- Progress (Minimalist) -->
-    <div class="fixed bottom-0 left-0 w-full h-0.5 bg-white/5 ui-element" :class="isIdle && 'ui-hidden'">
-        <div class="h-full bg-[var(--hs-accent)] transition-all duration-500 ease-out shadow-[0_0_8px_var(--hs-accent)]"
+    <div class="fixed bottom-0 left-0 w-full h-1 bg-white/5 ui-element" :class="isIdle && 'ui-hidden'">
+        <div class="h-full progress-bar transition-all duration-500 ease-out"
             :style="'width: ' + ((current + 1) / total * 100) + '%'"></div>
     </div>
 
