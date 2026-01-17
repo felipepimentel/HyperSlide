@@ -1,0 +1,14 @@
+<div class="flex h-full" style="<%= bgStyle %>">
+    <div class="w-1/2 p-12 flex flex-col justify-center bg-slate-900/50 backdrop-blur-sm">
+        <div class="prose lg:prose-xl dark:prose-invert">
+            <%- content %>
+        </div>
+    </div>
+    <div class="w-1/2 relative bg-slate-800">
+        <% if (locals.img) { %>
+            <%- include('../components/image', { src: img }) %>
+                <% } else if (locals.bg) { %>
+                    <!-- If bg is used as image for split view, we can render it here too, or just let CSS handle it -->
+                    <% } %>
+    </div>
+</div>
