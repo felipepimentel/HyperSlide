@@ -23,27 +23,9 @@ const ROOT_DIR = process.cwd();
  * Render a single slide using EJS and Markdown
  */
 function renderSlide(content, attributes, index, rootDir) {
-    let layout = attributes.layout;
+    const layout = attributes.layout || 'default';
 
-    // --- Smart Layout Inference ---
-    if (!layout) {
-        const hasTitle = /^#\s+.+$/m.test(content);
-        const hasSubTitle = /^##\s+.+$/m.test(content);
-        const hasImage = /!\[.*?\]\(.*?\)/.test(content);
-
-        // Clean up content by removing potential stray separators that might have leaked
-        const cleanContent = content.trim();
-
-        if (hasTitle && !hasSubTitle && !hasImage && cleanContent.split('\n').length < 5) {
-            layout = 'hero';
-        } else if (hasImage && (hasTitle || hasSubTitle)) {
-            layout = 'split';
-        } else {
-            layout = 'default';
-        }
-    }
-
-    // Path resolution
+    // Path resolution: Local first, then global (built-in)
     const localLayoutPath = path.join(rootDir, 'layouts', `${layout}.ejs`);
     const internalLayoutPath = path.join(__dirname, '..', 'layouts', `${layout}.ejs`);
     const fallbackLayoutPath = path.join(__dirname, '..', 'layouts', 'default.ejs');
@@ -52,20 +34,28 @@ function renderSlide(content, attributes, index, rootDir) {
     let templateStr;
 
     try {
-        templatePath = fs.existsSync(localLayoutPath) ? localLayoutPath : (fs.existsSync(internalLayoutPath) ? internalLayoutPath : fallbackLayoutPath);
+        if (fs.existsSync(localLayoutPath)) {
+            templatePath = localLayoutPath;
+        } else if (fs.existsSync(internalLayoutPath)) {
+            templatePath = internalLayoutPath;
+        } else {
+            templatePath = fallbackLayoutPath;
+        }
         templateStr = fs.readFileSync(templatePath, 'utf8');
     } catch (e) {
-        return `<div class="p-10 border border-red-500 rounded text-red-500">Layout Error: ${layout}</div>`;
+        return `<div class="p-10 bg-red-900/20 border border-red-500 rounded text-red-500">
+            <h2 class="font-bold">Layout Error</h2>
+            <p>Could not find or read layout: <code>${layout}</code></p>
+        </div>`;
     }
 
-    // Parse Speaker Notes
+    // Parse Speaker Notes (content after ???)
     const parts = content.split(/\n\?\?\?\n/);
     const mainContent = parts[0];
     const speakerNotes = parts[1] ? md.render(parts[1]) : '';
 
-    // Convert markdown to HTML and TRANSFORM separators (avoid rendering --- as <hr>)
+    // Convert markdown body to HTML using markdown-it
     let bodyHtml = md.render(mainContent);
-    bodyHtml = bodyHtml.replace(/<hr>/g, ''); // Ensure no horizontal rules leak from separators
     bodyHtml = transformCallouts(bodyHtml);
 
     // Context for EJS
@@ -85,31 +75,43 @@ function renderSlide(content, attributes, index, rootDir) {
 
     try {
         const slideHtml = ejs.render(templateStr, context, {
-            views: [path.join(rootDir, 'layouts'), path.join(rootDir, 'components'), path.join(__dirname, '..', 'layouts'), path.join(__dirname, '..', 'components')],
+            views: [
+                path.join(rootDir, 'layouts'),
+                path.join(rootDir, 'components'),
+                path.join(__dirname, '..', 'layouts'),
+                path.join(__dirname, '..', 'components')
+            ],
             filename: templatePath
         });
-
-        // Theme injection & UI Variable Override
-        let themeTag = '';
-        if (attributes.theme) {
-            const themePath = attributes.theme.endsWith('.css') ? attributes.theme : `/styles/${attributes.theme}.css`;
-            themeTag = `<link rel="stylesheet" href="${themePath}">`;
-        }
 
         return `
         <div x-show="current === ${index}" 
              style="${context.style}"
              data-index="${index}"
              x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-98"
-             x-transition:enter-end="opacity-100 scale-100"
+             x-transition:enter-start="opacity-0 transform translate-x-10"
+             x-transition:enter-end="opacity-100 transform translate-x-0"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="opacity-100 transform translate-x-0"
+             x-transition:leave-end="opacity-0 transform -translate-x-10"
              class="slide-content absolute inset-0 w-full h-full ${context.class}">
-             ${themeTag}
              ${slideHtml}
              <template class="speaker-notes">${speakerNotes}</template>
         </div>`;
     } catch (err) {
-        return `<div class="p-10 text-red-500">Render Error: ${err.message}</div>`;
+        return `
+        <div x-show="current === ${index}" class="absolute inset-0 w-full h-full flex items-center justify-center bg-red-950 p-12">
+            <div class="max-w-4xl w-full bg-red-900/20 border-2 border-red-500 rounded-2xl p-8 text-red-100">
+                <h2 class="text-3xl font-bold mb-4 flex items-center gap-3">
+                    <span class="bg-red-500 text-red-950 px-2 py-1 rounded text-sm uppercase tracking-widest">EJS Error</span>
+                    Slide ${index + 1}
+                </h2>
+                <pre class="bg-black/50 p-4 rounded-lg overflow-x-auto text-sm font-mono border border-red-500/30 whitespace-pre-wrap">${err.message}</pre>
+                <div class="mt-6 text-sm opacity-60 italic">
+                    Check your layout <strong>${path.basename(templatePath)}</strong> for syntax errors.
+                </div>
+            </div>
+        </div>`;
     }
 }
 
@@ -130,35 +132,7 @@ function getAllSlides(filePath) {
         slidesBody = parsed.body;
     }
 
-    // --- Smart Splitting Logic ---
-    let rawSlides = [];
-    const hasExplicitSeparator = /\n-{3,}\n/.test(slidesBody);
-
-    if (hasExplicitSeparator) {
-        rawSlides = slidesBody.split(/\n-{3,}\n/);
-    } else if (globalAttributes.hyperslide) {
-        // Automatically split by H1 or H2
-        // We look for headers and use them as split points
-        const lines = slidesBody.split('\n');
-        let currentSlide = [];
-
-        lines.forEach(line => {
-            if (/^#\s+/.test(line) || /^##\s+/.test(line)) {
-                if (currentSlide.length > 0) {
-                    rawSlides.push(currentSlide.join('\n'));
-                    currentSlide = [];
-                }
-            }
-            currentSlide.push(line);
-        });
-
-        if (currentSlide.length > 0) {
-            rawSlides.push(currentSlide.join('\n'));
-        }
-    } else {
-        // Standard single slide fallback
-        rawSlides = [slidesBody];
-    }
+    const rawSlides = slidesBody.split(/\n-{3,}\n/);
 
     return rawSlides.map((chunk, idx) => {
         if (!chunk.trim()) return '';

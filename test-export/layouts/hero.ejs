@@ -1,0 +1,12 @@
+<div class="flex flex-col items-center justify-center h-full p-20 text-center" style="<%= bgStyle %>">
+    <% if (locals.title) { %>
+        <h1
+            class="text-6xl font-black mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            <%= title %>
+        </h1>
+        <% } %>
+
+            <div class="prose lg:prose-xl dark:prose-invert max-w-3xl">
+                <%- content %>
+            </div>
+</div>

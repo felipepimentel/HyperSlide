@@ -9,7 +9,16 @@ class: bg-slate-900 text-white
 -->
 
 # Components & Diagrams
+
 HyperSlide now supports **Mermaid**, **Callouts**, and **Tables**!
+
+???
+
+# Speaker Notes
+
+- Mention that Mermaid is rendered via CDN.
+- Explain that Callouts use custom regex/plugin logic.
+- Highlight the new "EJS first" architecture.
 
 ---
 
@@ -54,6 +63,7 @@ class: bg-slate-800
 -->
 
 ## Data Tables
+
 Standard Markdown tables are automatically styled.
 
 | Feature | Supported | Notes |
@@ -72,5 +82,6 @@ class: text-black
 style: text-shadow: none;
 -->
 
-# It Works!
+# It Works
+
 Refactored to EJS & Components Architecture.

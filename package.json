@@ -7,8 +7,8 @@
     "hyperslide": "./bin/hyperslide.js"
   },
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "node bin/hyperslide.js dev",
+    "dev": "node bin/hyperslide.js dev"
   },
   "keywords": [
     "slides",

@@ -1,0 +1,61 @@
+:root {
+    --bg-color: #282a36;
+    --fg-color: #f8f8f2;
+    --selection-color: #44475a;
+    --comment-color: #6272a4;
+    --cyan-color: #8be9fd;
+    --green-color: #50fa7b;
+    --orange-color: #ffb86c;
+    --pink-color: #ff79c6;
+    --purple-color: #bd93f9;
+    --red-color: #ff5555;
+    --yellow-color: #f1fa8c;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--fg-color);
+}
+
+.prose {
+    --tw-prose-body: var(--fg-color);
+    --tw-prose-headings: var(--purple-color);
+    --tw-prose-links: var(--cyan-color);
+    --tw-prose-bold: var(--orange-color);
+    --tw-prose-counters: var(--pink-color);
+    --tw-prose-bullets: var(--pink-color);
+    --tw-prose-hr: var(--selection-color);
+    --tw-prose-quotes: var(--yellow-color);
+    --tw-prose-quote-borders: var(--purple-color);
+    --tw-prose-captions: var(--comment-color);
+    --tw-prose-code: var(--green-color);
+    --tw-prose-pre-code: var(--fg-color);
+    --tw-prose-pre-bg: var(--selection-color);
+    --tw-prose-th-borders: var(--selection-color);
+    --tw-prose-td-borders: var(--selection-color);
+}
+
+.callout {
+    background-color: rgba(68, 71, 90, 0.4);
+    border-color: var(--purple-color);
+}
+
+.callout-info { border-color: var(--cyan-color); }
+.callout-warning { border-color: var(--orange-color); }
+.callout-error { border-color: var(--red-color); }
+.callout-success { border-color: var(--green-color); }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-color);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--selection-color);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--comment-color);
+}

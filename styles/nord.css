@@ -1,0 +1,46 @@
+:root {
+    /* Slide Colors */
+    --bg-color: #2e3440;
+    --fg-color: #eceff4;
+    --selection-color: #4c566a;
+    --comment-color: #616e88;
+    --cyan-color: #88c0d0;
+    --green-color: #a3be8c;
+    --orange-color: #d08770;
+    --pink-color: #b48ead;
+    --purple-color: #b48ead;
+    --red-color: #bf616a;
+    --yellow-color: #ebcb8b;
+
+    /* Shell Overrides */
+    --hs-accent: #88c0d0;
+    --hs-bg: #2e3440;
+    --hs-ui-fg: #616e88;
+    --hs-sidebar-bg: rgba(46, 52, 64, 0.9);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--fg-color);
+}
+
+.prose {
+    --tw-prose-body: var(--fg-color);
+    --tw-prose-headings: var(--cyan-color);
+    --tw-prose-links: var(--green-color);
+    --tw-prose-bold: var(--orange-color);
+    --tw-prose-counters: var(--purple-color);
+    --tw-prose-bullets: var(--purple-color);
+    --tw-prose-hr: var(--selection-color);
+    --tw-prose-quotes: var(--yellow-color);
+    --tw-prose-quote-borders: var(--cyan-color);
+    --tw-prose-captions: var(--comment-color);
+    --tw-prose-code: var(--green-color);
+    --tw-prose-pre-code: var(--fg-color);
+    --tw-prose-pre-bg: var(--selection-color);
+}
+
+.callout {
+    background-color: rgba(76, 86, 106, 0.4);
+    border-color: var(--cyan-color);
+}

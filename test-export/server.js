@@ -58,45 +58,25 @@ function startServer(options = {}) {
     </script>
 
     <style>
-        :root {
-            --hs-accent: #3b82f6;
-            --hs-bg: #0f172a;
-            --hs-ui-fg: #94a3b8;
-            --hs-sidebar-bg: rgba(15, 23, 42, 0.8);
-        }
-
-        /* Custom Table & Callouts */
+        /* Custom Table Styles */
         table { width: 100%; border-collapse: collapse; margin: 1em 0; }
-        th, td { border: 1px solid #475569; padding: 0.5em; text-align: left; }
-        th { background-color: rgba(30, 41, 59, 0.5); }
+        th, td { border: 1px solid #475569; padding: 0.5em; text-align: left; opacity: 1; }
+        th { background-color: #1e293b; }
         
-        .callout { border-left-width: 4px; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; background-color: rgba(30, 41, 59, 0.5); }
-        .callout-info { border-color: #3b82f6; }
-        .callout-warning { border-color: #eab308; }
-        .callout-error { border-color: #ef4444; }
-        .callout-success { border-color: #22c55e; }
+        /* Callout Styles */
+        .callout { border-left-width: 4px; border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; background-color: rgba(30, 41, 59, 0.5); opacity: 1; display: block; }
+        .callout-info { border-color: #3b82f6; background-color: rgba(59, 130, 246, 0.1); }
+        .callout-warning { border-color: #eab308; background-color: rgba(234, 179, 8, 0.1); }
+        .callout-error { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
+        .callout-success { border-color: #22c55e; background-color: rgba(34, 197, 94, 0.1); }
 
-        /* Minimalist Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            right: 0;
-            height: 100%;
-            width: 300px;
-            background: var(--hs-sidebar-bg);
-            backdrop-filter: blur(16px);
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 100;
+        /* Glassmorphism Help Modal */
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .sidebar.open { transform: translateX(0); }
-        
-        /* Auto-hide UI components */
-        .ui-element {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .ui-hidden { opacity: 0; visibility: hidden; }
     </style>
 
     <!-- Alpine Store -->
@@ -106,9 +86,6 @@ function startServer(options = {}) {
                 current: 0,
                 total: ${slideCount},
                 showHelp: false,
-                lastMove: Date.now(),
-                isIdle: false,
-                
                 init() {
                     const hash = window.location.hash.replace('#', '');
                     if (hash !== '') this.current = parseInt(hash) || 0;
@@ -125,7 +102,12 @@ function startServer(options = {}) {
                             div.textContent = code.textContent;
                             pre.replaceWith(div);
                         });
-                        if (window.mermaid) window.mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+                        
+                        if (window.mermaid) {
+                            window.mermaid.run({
+                                nodes: document.querySelectorAll('.mermaid')
+                            });
+                        }
                     };
 
                     document.body.addEventListener('htmx:afterSwap', () => {
@@ -135,101 +117,99 @@ function startServer(options = {}) {
                     });
                     
                     hljs.highlightAll();
-                    setTimeout(processMermaid, 200);
-
-                    // Idle detection
-                    setInterval(() => {
-                        if (Date.now() - this.lastMove > 3000) this.isIdle = true;
-                    }, 1000);
+                    setTimeout(processMermaid, 500); 
                 },
-
-                userActive() {
-                    this.lastMove = Date.now();
-                    this.isIdle = false;
-                },
-
                 next() { if (this.current < this.total - 1) this.current++; },
                 prev() { if (this.current > 0) this.current--; }
             }));
         });
         
+        // Reload listener
         const source = new EventSource('/reload');
-        source.onmessage = (e) => {
-            if (e.data === 'reload') document.getElementById('slide-container').dispatchEvent(new Event('slides-changed'));
-            else if (e.data.startsWith('sync:')) {
+        source.onmessage = function(event) {
+            if (event.data === 'reload') {
+                document.getElementById('slide-container').dispatchEvent(new Event('slides-changed'));
+            } else if (event.data.startsWith('sync:')) {
+                const newIndex = parseInt(event.data.split(':')[1]);
                 const slideshow = Alpine.$data(document.body);
-                if (slideshow) slideshow.current = parseInt(e.data.split(':')[1]);
+                if (slideshow && slideshow.current !== newIndex) {
+                    slideshow.current = newIndex;
+                }
             }
         };
     </script>
 </head>
 <body x-data="slideshow" 
-      @mousemove.window="userActive()"
-      @keydown.window="userActive()"
       @keydown.right.window="next()" 
       @keydown.left.window="prev()"
       @keydown.?.window="showHelp = !showHelp"
       @keydown.escape.window="showHelp = false"
-      class="h-full overflow-hidden antialiased bg-[var(--hs-bg)] relative">
+      class="h-full overflow-hidden antialiased selection:bg-pink-500 selection:text-white relative">
 
-    <!-- Main Stage -->
+    <!-- Main Slide Stage -->
     <main id="slide-container" 
           class="w-full h-full relative overflow-hidden"
           hx-get="/slides" 
           hx-trigger="load, slides-changed" 
           hx-swap="innerHTML">
-          <div class="flex items-center justify-center h-full text-2xl text-slate-500 animate-pulse">Loading...</div>
+          <div class="flex items-center justify-center h-full text-2xl text-slate-500 animate-pulse">
+            Loading HyperSlide...
+          </div>
     </main>
 
-    <!-- Progress (Minimalist) -->
-    <div class="fixed bottom-0 left-0 w-full h-0.5 bg-white/5 ui-element" :class="isIdle && 'ui-hidden'">
-        <div class="h-full bg-[var(--hs-accent)] transition-all duration-500 ease-out shadow-[0_0_8px_var(--hs-accent)]"
+    <!-- Progress Bar (Futuristic) -->
+    <div class="fixed bottom-0 left-0 w-full h-1.5 bg-slate-800/30">
+        <div class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 shadow-[0_0_10px_rgba(168,85,247,0.5)] transition-all duration-500 ease-out"
              :style="'width: ' + ((current + 1) / total * 100) + '%'"></div>
     </div>
 
-    <!-- Minimalist Sidebar Shortcuts -->
-    <div class="sidebar" :class="showHelp && 'open'">
-        <div class="p-8 h-full flex flex-col">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-xs font-bold uppercase tracking-[0.2em] text-[var(--hs-ui-fg)]">Key Bindings</h2>
-                <button @click="showHelp = false" class="text-[var(--hs-ui-fg)] hover:text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            
-            <div class="space-y-6">
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Next Slide</span>
-                    <kbd class="text-[var(--hs-accent)] font-mono">→</kbd>
-                </div>
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Prev Slide</span>
-                    <kbd class="text-[var(--hs-accent)] font-mono">←</kbd>
-                </div>
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Shortcuts</span>
-                    <kbd class="text-[var(--hs-accent)] font-mono">?</kbd>
-                </div>
-                <div class="flex justify-between items-end border-b border-white/5 pb-2">
-                    <span class="text-sm text-white/50">Speaker View</span>
-                    <span class="text-[10px] text-[var(--hs-accent)] opacity-70 uppercase">/speaker</span>
-                </div>
-            </div>
-
-            <div class="mt-auto text-[10px] text-center text-white/20 tracking-widest uppercase">
-                HyperSlide Refined
-            </div>
+    <!-- Controls & Help Hint -->
+    <div class="fixed bottom-6 right-6 flex items-center gap-4 text-slate-400 group">
+        <button @click="showHelp = true" class="w-8 h-8 rounded-full border border-slate-700 flex items-center justify-center hover:bg-slate-800 transition-colors">
+            ?
+        </button>
+        <div class="bg-slate-800/50 px-3 py-1 rounded-full text-xs font-mono backdrop-blur-sm opacity-50 group-hover:opacity-100 transition-opacity">
+            <span x-text="(current + 1)"></span> / <span x-text="total"></span>
         </div>
     </div>
 
-    <!-- Hover Hint (Bottom Right) -->
-    <div class="fixed bottom-4 right-4 flex items-center gap-4 ui-element" :class="isIdle && 'ui-hidden'">
-        <div class="text-[var(--hs-ui-fg)] text-[10px] font-mono tracking-tighter opacity-70">
-            <span x-text="(current + 1)"></span> / <span x-text="total"></span>
+    <!-- Help Modal -->
+    <div x-show="showHelp" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 scale-95"
+         x-transition:enter-end="opacity-100 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 scale-100"
+         x-transition:leave-end="opacity-0 scale-95"
+         class="fixed inset-0 z-50 flex items-center justify-center p-6"
+         @click.self="showHelp = false"
+         style="display: none;">
+        <div class="glass w-full max-w-md p-8 rounded-3xl shadow-2xl">
+            <h2 class="text-2xl font-bold mb-6 text-white flex items-center gap-2">
+                <span class="text-blue-400">⌨️</span> Shortcuts
+            </h2>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    <span class="text-slate-300">Next Slide</span>
+                    <kbd class="px-2 py-1 bg-slate-700 rounded text-xs font-mono">→</kbd>
+                </div>
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    <span class="text-slate-300">Prev Slide</span>
+                    <kbd class="px-2 py-1 bg-slate-700 rounded text-xs font-mono">←</kbd>
+                </div>
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    <span class="text-slate-300">Speaker View</span>
+                    <span class="text-xs text-slate-500">add /speaker to URL</span>
+                </div>
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    <span class="text-slate-300">Close Help</span>
+                    <kbd class="px-2 py-1 bg-slate-700 rounded text-xs font-mono">ESC</kbd>
+                </div>
+            </div>
+            <button @click="showHelp = false" class="mt-8 w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl transition-colors shadow-lg shadow-blue-900/20">
+                Got it!
+            </button>
         </div>
-        <button @click="showHelp = true" class="w-6 h-6 rounded-full border border-white/10 flex items-center justify-center text-[10px] text-[var(--hs-ui-fg)] hover:bg-white/5 transition-colors">
-            ?
-        </button>
     </div>
 
 </body>
