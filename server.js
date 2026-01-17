@@ -71,43 +71,40 @@ function startServer(options = {}) {
 
     app.post('/sync', (req, res) => {
         currentSlideIndex = req.body.index;
-        reloadClients.forEach(client => {
-            // reloadClients.forEach(client => { // This was for old reloadClients
-            //     client.res.write(`data: sync:${currentSlideIndex}\n\n`);
-            // });
-            broadcast({ type: 'sync', index: currentSlideIndex }); // Use new broadcast
-            res.sendStatus(200);
-        });
+        broadcast({ type: 'sync', index: currentSlideIndex });
+        res.sendStatus(200);
+    });
 
-        app.get('/slides', (req, res) => {
-            const html = renderer.getAllSlides(slidesPath);
-            res.send(html);
-        });
+    app.get('/slides', (req, res) => {
+        const html = renderer.getAllSlides(slidesPath);
+        res.send(html);
+    });
 
+    // Global File Watcher
+    const watcher = chokidar.watch([
+        slidesPath,
+        path.join(ROOT_DIR, 'templates'),
         path.join(ROOT_DIR, 'layouts'),
-            path.join(ROOT_DIR, 'style.css'),
-            path.join(__dirname, 'templates'), // Watch internal templates too
-            path.join(__dirname, 'lib/client') // Watch internal client scripts
-        ]);
+        path.join(ROOT_DIR, 'style.css'),
+        path.join(__dirname, 'templates'),
+        path.join(__dirname, 'lib/client')
+    ]);
 
-    watcher.on('change', (path) => {
-        console.log(`File changed: ${path}, reloading...`);
-        sendEvent();
+    watcher.on('change', (filePath) => {
+        console.log(`File changed: ${filePath}, reloading...`);
+        if (filePath.endsWith('.css')) {
+            broadcast({ type: 'style-reload' });
+        } else {
+            broadcast({ type: 'reload' });
+        }
     });
 
-    req.on('close', () => {
-        watcher.close();
-        reloadClients = reloadClients.filter(c => c.id !== clientId);
-        res.end();
+    app.listen(PORT, async () => {
+        console.log(`🚀 HyperSlide running at http://localhost:${PORT}`);
+        if (options.open) {
+            await open(`http://localhost:${PORT}`);
+        }
     });
-});
-
-app.listen(PORT, async () => {
-    console.log(`🚀 HyperSlide running at http://localhost:${PORT}`);
-    if (options.open) {
-        await open(`http://localhost:${PORT}`);
-    }
-});
 }
 
 module.exports = { startServer };

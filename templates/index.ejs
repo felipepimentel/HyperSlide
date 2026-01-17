@@ -309,6 +309,77 @@
                     display: block !important;
                 }
             }
+
+            /* Overview Mode */
+            .overview-mode {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                /* Larger thumbs */
+                gap: 2rem;
+                padding: 4rem;
+                overflow-y: auto !important;
+                background: var(--hs-bg);
+            }
+
+            .overview-mode .slide-content {
+                position: relative !important;
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 16/9;
+                transform: none !important;
+                animation: none !important;
+                border: 1px solid var(--hs-glass-border);
+                border-radius: 0.75rem;
+                cursor: pointer;
+                overflow: hidden;
+                display: block !important;
+                /* Override x-show */
+                background: var(--hs-glass-bg);
+                /* Ensure visible bg */
+            }
+
+            .overview-mode .slide-content:hover {
+                border-color: var(--hs-accent);
+                box-shadow: 0 0 0 4px var(--hs-accent-glow);
+                transform: scale(1.02) !important;
+                transition: transform 0.2s ease;
+            }
+
+            /* Mouse Control Zones */
+            .mouse-zone {
+                position: fixed;
+                top: 0;
+                bottom: 0;
+                width: 120px;
+                z-index: 40;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                cursor: pointer;
+            }
+
+            .mouse-zone:hover {
+                opacity: 1;
+            }
+
+            .mouse-zone-left {
+                left: 0;
+                background: linear-gradient(to right, rgba(0, 0, 0, 0.3), transparent);
+            }
+
+            .mouse-zone-right {
+                right: 0;
+                background: linear-gradient(to left, rgba(0, 0, 0, 0.3), transparent);
+            }
+
+            .mouse-zone svg {
+                width: 3rem;
+                height: 3rem;
+                color: rgba(255, 255, 255, 0.7);
+                filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+            }
         </style>
 
         <!-- Alpine Store -->
@@ -320,12 +391,24 @@
 
 <body x-data="slideshow" @mousemove.window="userActive()" @keydown.window="userActive()" @keydown.right.window="next()"
     @keydown.left.window="prev()" @keydown.?.window="showHelp = !showHelp" @keydown.escape.window="showHelp = false"
-    style="display: block;" x-init="total = <%= slideCount %>"
-    class="h-full overflow-hidden antialiased bg-[var(--hs-bg)] relative">
+    style="display: block;" x-init="total = 10" class="h-full overflow-hidden antialiased bg-[var(--hs-bg)] relative">
+
+    <!-- Mouse Zones -->
+    <div class="mouse-zone mouse-zone-left" @click="prev()" :class="showOverview && 'hidden'">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+    </div>
+    <div class="mouse-zone mouse-zone-right" @click="next()" :class="showOverview && 'hidden'">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+    </div>
 
     <!-- Main Stage -->
-    <main id="slide-container" class="w-full h-full relative overflow-hidden" hx-get="/slides"
-        hx-trigger="load, slides-changed" hx-swap="innerHTML">
+    <main id="slide-container" class="w-full h-full relative overflow-hidden" :class="showOverview && 'overview-mode'"
+        @click="if(showOverview && $event.target.closest('.slide-content')) goto($event.target.closest('.slide-content').dataset.index)"
+        hx-get="/slides" hx-trigger="load, slides-changed" hx-swap="innerHTML">
         <div class="flex items-center justify-center h-full text-2xl text-slate-500 animate-pulse">Loading...</div>
     </main>
 

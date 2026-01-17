@@ -148,9 +148,11 @@ Perfect for corporate use.
   Concept & Design Phase. Glassmorphism explored.
 - **Q2 2024**
   MVP Development. CLI built.
-- **Q3 2024**
-  Visual Mastery. Transitions & Themes added.
-- **Q4 2024**
+- **Q3 2024- **Premium Themes & Transitions**
+- **Mobile Remote & Polls**
+- **Overview Mode** (Press `O`)
+- **Mouse Navigation** (Hover edges)
+- **Zero Config**
   Global Launch.
 
 ---
